@@ -1,0 +1,140 @@
+/* Custom styles for React Quill to match the app's theme */
+
+.ql-editor {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: hsl(var(--foreground));
+  padding: 1rem 0;
+}
+
+.ql-editor.ql-blank::before {
+  color: hsl(var(--muted-foreground));
+  font-style: normal;
+  left: 0;
+}
+
+/* Bubble Theme */
+.ql-bubble .ql-tooltip {
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--popover-foreground));
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  z-index: 50;
+}
+
+.ql-bubble .ql-tooltip .ql-action::before {
+  content: 'Salvar';
+}
+
+.ql-bubble .ql-tooltip .ql-remove::before {
+  content: 'Remover';
+}
+
+.ql-bubble .ql-tooltip a {
+  color: hsl(var(--primary));
+}
+
+.ql-bubble .ql-tooltip input[type=text] {
+  background-color: hsl(var(--input));
+  border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground));
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.ql-bubble .ql-toolbar {
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 4px 8px;
+}
+
+.ql-bubble .ql-toolbar .ql-stroke,
+.ql-bubble .ql-toolbar .ql-picker-label .ql-stroke {
+  stroke: hsl(var(--popover-foreground));
+}
+
+.ql-bubble .ql-toolbar .ql-fill,
+.ql-bubble .ql-toolbar .ql-picker-label .ql-fill {
+  fill: hsl(var(--popover-foreground));
+}
+
+.ql-bubble .ql-toolbar .ql-picker-label {
+  color: hsl(var(--popover-foreground));
+}
+
+.ql-bubble .ql-toolbar .ql-picker-options {
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+}
+
+.ql-bubble .ql-toolbar .ql-picker-item {
+  color: hsl(var(--popover-foreground));
+}
+
+.ql-bubble .ql-toolbar .ql-picker-item:hover {
+  background-color: hsl(var(--accent));
+}
+
+.ql-bubble .ql-toolbar .ql-picker-item.ql-selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.ql-bubble .ql-color-picker .ql-picker-label svg,
+.ql-bubble .ql-icon-picker .ql-picker-label svg {
+  stroke: hsl(var(--popover-foreground)) !important;
+  fill: hsl(var(--popover-foreground)) !important;
+}
+
+.ql-bubble .ql-picker.ql-color-picker .ql-picker-label,
+.ql-bubble .ql-picker.ql-background .ql-picker-label {
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+/* Snow Theme */
+.ql-snow .ql-toolbar {
+  border-radius: 0.5rem 0.5rem 0 0;
+  border: 1px solid hsl(var(--input));
+  border-bottom: 0;
+  background: hsl(var(--background));
+}
+
+.ql-snow .ql-container {
+  border-radius: 0 0 0.5rem 0.5rem;
+  border: 1px solid hsl(var(--input));
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+
+.ql-snow .ql-editor {
+  min-height: 150px;
+  padding: 1rem;
+}
+
+.ql-snow .ql-stroke {
+  stroke: hsl(var(--foreground));
+}
+.ql-snow .ql-fill {
+  fill: hsl(var(--foreground));
+}
+.ql-snow .ql-picker-label {
+  color: hsl(var(--foreground));
+}
+.ql-snow .ql-picker-options {
+  background-color: hsl(var(--popover));
+  border-color: hsl(var(--border));
+}
+.ql-snow .ql-picker-item {
+  color: hsl(var(--popover-foreground));
+}
+.ql-snow .ql-picker-item:hover {
+  background-color: hsl(var(--accent));
+}
+.ql-snow .ql-picker-item.ql-selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}

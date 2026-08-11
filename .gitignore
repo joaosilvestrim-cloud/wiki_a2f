@@ -1,0 +1,31 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+dist-ssr/
+
+# env (contem chaves)
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# editor / os
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# misc
+.cache/
