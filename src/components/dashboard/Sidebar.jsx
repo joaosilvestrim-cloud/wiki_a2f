@@ -104,16 +104,20 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
       to={item.path}
       end={item.path === '/dashboard'}
       className={({ isActive }) =>
-        `flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors group ${
-          isActive
-            ? 'bg-white/20 text-white'
-            : 'text-blue-100 hover:bg-white/10 hover:text-white'
-        }`
+        `a2f-sidebar-link ${isActive ? 'a2f-sidebar-link-active' : 'a2f-sidebar-link-idle'}`
       }
       onClick={!isDesktop ? onClose : undefined}
     >
-      <item.icon className="w-5 h-5 mr-3 text-blue-200 group-hover:text-white transition-colors" />
-      <span>{item.name}</span>
+      {({ isActive }) => (
+        <>
+          <item.icon
+            className={`w-5 h-5 mr-3 transition-colors ${
+              isActive ? 'text-cyan-300' : 'text-slate-400 group-hover:text-cyan-300'
+            }`}
+          />
+          <span>{item.name}</span>
+        </>
+      )}
     </NavLink>
   );
 
@@ -128,12 +132,12 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
     return (
       <div className="relative">
         <div 
-          className="absolute left-0 top-0 h-full w-px bg-blue-500/50" 
+          className="absolute left-0 top-0 h-full w-px bg-cyan-400/25" 
           style={{ marginLeft: `${12 + level * 16}px` }}
         ></div>
         <div className="flex items-center group">
           <div 
-            className="absolute top-1/2 -translate-y-1/2 h-px w-4 bg-blue-500/50"
+            className="absolute top-1/2 -translate-y-1/2 h-px w-4 bg-cyan-400/25"
             style={{ left: `${12 + level * 16}px` }}
           ></div>
           <NavLink
@@ -141,7 +145,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
             className={`flex-grow flex items-center py-2 text-sm font-medium transition-colors rounded-r-md ${
               isActive
                 ? 'text-white bg-white/10'
-                : 'text-blue-100 hover:text-white hover:bg-white/5'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
             style={{ paddingLeft: `${36 + level * 16}px` }}
             onClick={!isDesktop ? onClose : undefined}
@@ -150,7 +154,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
           </NavLink>
           {hasChildren && (
             <button onClick={() => setIsSubMenuOpen(!isSubMenuOpen)} className="p-1 rounded-md hover:bg-white/10 mr-2">
-              <ChevronRight className={`w-4 h-4 transition-transform text-blue-200 ${isSubMenuOpen ? 'rotate-90' : ''}`} />
+              <ChevronRight className={`w-4 h-4 transition-transform text-slate-400 ${isSubMenuOpen ? 'rotate-90' : ''}`} />
             </button>
           )}
         </div>
@@ -181,37 +185,37 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-blue-700 text-white">
+    <div className="flex flex-col h-full a2f-sidebar text-slate-200 border-r border-white/5">
       <div className="flex items-center justify-between h-16 px-4 border-b border-white/20">
         <div className="flex items-center space-x-3">
           <img src="https://horizons-cdn.hostinger.com/d3ba95b5-e5fd-4cdf-8fb4-fbdb2a8481f8/23d00d06a1d2f2071eebdfd37f83aad4.png" alt="A2F Logo" className="h-8" />
         </div>
         {!isDesktop && (
-          <Button variant="ghost" size="icon" onClick={onClose} className="text-blue-100 hover:text-white hover:bg-white/10">
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-300 hover:text-white hover:bg-white/10">
             <X className="w-6 h-6" />
           </Button>
         )}
       </div>
 
       <div className="flex-1 p-3 space-y-1 overflow-y-auto">
-        <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-blue-300 uppercase">Principal</p>
+        <p className="px-3 pt-2 pb-1 text-xs font-semibold tracking-wider text-cyan-300/70 uppercase">Principal</p>
         {mainNavItems.map(item => <SidebarLink key={item.name} item={item} />)}
         
         {user?.is_admin && adminNavItems.map(item => <SidebarLink key={item.name} item={item} />)}
 
-        <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wider text-blue-300 uppercase">Navegação</p>
+        <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wider text-cyan-300/70 uppercase">Navegação</p>
         <SidebarLink item={{ name: 'Mural', path: '/dashboard/page/mural', icon: Newspaper }} />
         <SidebarLink item={{ name: 'Conheça a Equipe', path: '/dashboard/page/conheca-a-equipe', icon: Users2 }} />
 
         <button
           onClick={() => setOpenPagesMenu(!openPagesMenu)}
-          className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg text-blue-100 hover:bg-white/10 hover:text-white group"
+          className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-lg text-slate-300 hover:bg-white/5 hover:text-white group"
         >
           <div className="flex items-center">
-            <Compass className="w-5 h-5 mr-3 text-blue-200 group-hover:text-white transition-colors" />
+            <Compass className="w-5 h-5 mr-3 text-slate-400 group-hover:text-cyan-300 transition-colors" />
             <span>Outras Páginas</span>
           </div>
-          <ChevronRight className={`w-5 h-5 transition-transform ${openPagesMenu ? 'rotate-90' : ''}`} />
+          <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform ${openPagesMenu ? 'rotate-90' : ''}`} />
         </button>
         <AnimatePresence>
           {openPagesMenu && (
@@ -228,7 +232,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
 
         {user?.is_admin && (
           <>
-            <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wider text-blue-300 uppercase">Admin</p>
+            <p className="px-3 pt-4 pb-1 text-xs font-semibold tracking-wider text-cyan-300/70 uppercase">Admin</p>
             <SidebarLink item={{ name: 'Monitoramento de Func.', path: '/dashboard/employee-monitoring', icon: Activity }} />
             <SidebarLink item={{ name: 'Monitoramento de NFs', path: '/dashboard/invoice-monitoring', icon: Receipt }} />
             <SidebarLink item={{ name: 'Gerenciar Usuários', path: '/dashboard/users', icon: Shield }} />
@@ -248,7 +252,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
         <SidebarLink item={{ name: 'Configurações', path: '/dashboard/settings', icon: Settings }} />
         <Button
           variant="ghost"
-          className="w-full justify-start text-blue-100 hover:bg-red-500/80 hover:text-white px-3 py-2.5"
+          className="w-full justify-start text-slate-300 hover:bg-red-500/80 hover:text-white px-3 py-2.5"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5 mr-3" />
