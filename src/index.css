@@ -42,41 +42,7 @@
     --status-red-bg: 0 86% 93%;
   }
 
-  .dark {
-    /* Tema escuro - Paleta A2F (navy + ciano) */
-    --background: 222 28% 10%;
-    --foreground: 210 25% 97%;
-    --card: 222 24% 14%;
-    --card-foreground: 210 25% 97%;
-    --popover: 222 28% 10%;
-    --popover-foreground: 210 25% 97%;
-    --primary: 205 90% 56%;
-    --primary-foreground: 214 40% 10%;
-    --secondary: 222 18% 20%;
-    --secondary-foreground: 210 25% 97%;
-    --muted: 222 18% 20%;
-    --muted-foreground: 214 18% 66%;
-    --accent: 188 85% 46%;
-    --accent-foreground: 214 40% 10%;
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 25% 97%;
-    --border: 222 16% 24%;
-    --input: 222 16% 22%;
-    --ring: 205 90% 56%;
 
-    /* Status Tokens */
-    --status-active: 120 70% 45%;
-    --status-inactive: 0 70% 50%;
-    --status-warning: 38 80% 50%;
-    
-    /* Invoice Status Tokens */
-    --status-green: 142 70% 45%;
-    --status-green-bg: 142 70% 10%;
-    --status-yellow: 38 80% 50%;
-    --status-yellow-bg: 38 80% 10%;
-    --status-red: 0 70% 50%;
-    --status-red-bg: 0 70% 10%;
-  }
 }
 
 @layer base {

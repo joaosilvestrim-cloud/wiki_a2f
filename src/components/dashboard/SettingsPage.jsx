@@ -9,22 +9,17 @@ import {
   Save,
   Eye,
   EyeOff,
-  Sun,
-  Moon,
-  Laptop,
   Upload,
   Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
 import { supabase } from '@/lib/customSupabaseClient';
 import { v4 as uuidv4 } from 'uuid';
 
 const SettingsPage = () => {
   const { user, updateUserProfile } = useAuth();
-  const { theme, setTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
@@ -398,31 +393,9 @@ const SettingsPage = () => {
 
   const renderAppearanceTab = () => (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-foreground">Tema</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <button
-            onClick={() => setTheme('light')}
-            className={`p-4 rounded-lg border-2 flex flex-col items-center justify-center space-y-2 transition-colors ${theme === 'light' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}
-          >
-            <Sun className="w-8 h-8 text-foreground" />
-            <span className="font-medium text-foreground">Claro</span>
-          </button>
-          <button
-            onClick={() => setTheme('dark')}
-            className={`p-4 rounded-lg border-2 flex flex-col items-center justify-center space-y-2 transition-colors ${theme === 'dark' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}
-          >
-            <Moon className="w-8 h-8 text-foreground" />
-            <span className="font-medium text-foreground">Escuro</span>
-          </button>
-          <button
-            onClick={() => setTheme('system')}
-            className={`p-4 rounded-lg border-2 flex flex-col items-center justify-center space-y-2 transition-colors ${theme === 'system' ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'}`}
-          >
-            <Laptop className="w-8 h-8 text-foreground" />
-            <span className="font-medium text-foreground">Sistema</span>
-          </button>
-        </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-foreground">Tema Visual</h3>
+        <p className="text-sm text-muted-foreground">O sistema está configurado no tema claro padrão.</p>
       </div>
 
       <div className="space-y-4">
