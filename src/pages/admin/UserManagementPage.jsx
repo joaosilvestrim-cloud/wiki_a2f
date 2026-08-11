@@ -17,10 +17,11 @@ const UserForm = ({ user, onSave, onCancel }) => {
     name: user?.name || '',
     email: user?.email || '',
     password: '',
-    role: user?.role || 'user',
+    role: user?.role || '',
     department: user?.department || '',
     phone: user?.phone || '',
     location: user?.location || '',
+    is_admin: user?.is_admin || false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,51 +40,97 @@ const UserForm = ({ user, onSave, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="name">Nome Completo</Label>
-          <Input id="name" value={formData.name} onChange={handleChange} required />
+          <Label htmlFor="name" className="text-sm font-medium text-foreground">Nome Completo</Label>
+          <Input id="name" value={formData.name} onChange={handleChange} required placeholder="Ex: João da Silva" className="mt-1" />
         </div>
         <div>
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" value={formData.email} onChange={handleChange} required disabled={isEditing} />
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">Email</Label>
+          <Input id="email" type="email" value={formData.email} onChange={handleChange} required disabled={isEditing} placeholder="Ex: joao@a2f.com.br" className="mt-1" />
         </div>
       </div>
+      
       {!isEditing && (
         <div>
-          <Label htmlFor="password">Senha</Label>
-          <div className="relative">
-            <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} required minLength="6" />
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha Provisória</Label>
+          <div className="relative mt-1">
+            <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} required minLength="6" placeholder="Mínimo 6 caracteres" />
             <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="role">Cargo</Label>
-          <Input id="role" value={formData.role} onChange={handleChange} />
-        </div>
-        <div>
-          <Label htmlFor="department">Departamento</Label>
-          <Input id="department" value={formData.department} onChange={handleChange} />
+
+      {/* Permission Selection - Custom interactive cards */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground">Nível de Permissão</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-1">
+          <button
+            type="button"
+            onClick={() => setFormData(prev => ({ ...prev, is_admin: false }))}
+            className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+              !formData.is_admin
+                ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                : 'border-border bg-card hover:bg-secondary'
+            }`}
+          >
+            <div className={`p-1.5 rounded-lg ${!formData.is_admin ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'}`}>
+              <User className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Colaborador</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Acesso padrão aos módulos e conteúdos.</p>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setFormData(prev => ({ ...prev, is_admin: true }))}
+            className={`flex items-start gap-3 p-3 rounded-xl border text-left transition-all ${
+              formData.is_admin
+                ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                : 'border-border bg-card hover:bg-secondary'
+            }`}
+          >
+            <div className={`p-1.5 rounded-lg ${formData.is_admin ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'}`}>
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Administrador</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Acesso completo para gerenciar toda a intranet.</p>
+            </div>
+          </button>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-border pt-4">
         <div>
-          <Label htmlFor="phone">Telefone</Label>
-          <Input id="phone" type="tel" value={formData.phone} onChange={handleChange} />
+          <Label htmlFor="role" className="text-sm font-medium text-foreground">Cargo</Label>
+          <Input id="role" value={formData.role} onChange={handleChange} placeholder="Ex: Analista Financeiro" className="mt-1" />
         </div>
         <div>
-          <Label htmlFor="location">Localização</Label>
-          <Input id="location" value={formData.location} onChange={handleChange} />
+          <Label htmlFor="department" className="text-sm font-medium text-foreground">Departamento</Label>
+          <Input id="department" value={formData.department} onChange={handleChange} placeholder="Ex: Financeiro" className="mt-1" />
         </div>
       </div>
-      <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-        <Button type="submit" disabled={isSubmitting}>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="phone" className="text-sm font-medium text-foreground">Telefone</Label>
+          <Input id="phone" type="tel" value={formData.phone} onChange={handleChange} placeholder="Ex: (11) 99999-9999" className="mt-1" />
+        </div>
+        <div>
+          <Label htmlFor="location" className="text-sm font-medium text-foreground">Localização</Label>
+          <Input id="location" value={formData.location} onChange={handleChange} placeholder="Ex: São Paulo - SP" className="mt-1" />
+        </div>
+      </div>
+
+      <DialogFooter className="border-t border-border pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="border-border hover:bg-secondary">Cancelar</Button>
+        <Button type="submit" disabled={isSubmitting} className="bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 text-white">
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isEditing ? 'Salvar Alterações' : 'Criar Usuário'}
         </Button>
@@ -135,13 +182,14 @@ const UserManagementPage = () => {
           department: formData.department,
           phone: formData.phone,
           location: formData.location,
+          is_admin: formData.is_admin,
         })
         .eq('id', editingUser.id);
 
       if (error) {
         toast({ title: "Erro ao atualizar usuário", description: error.message, variant: "destructive" });
       } else {
-        await logAction('user_updated', { userId: editingUser.id, name: formData.name });
+        await logAction('user_updated', { userId: editingUser.id, name: formData.name, isAdmin: formData.is_admin });
         toast({ title: "Sucesso!", description: `Usuário ${formData.name} atualizado.` });
         handleCloseModal();
         fetchUsers();
@@ -163,8 +211,19 @@ const UserManagementPage = () => {
       });
 
       if (error || data.error) {
-        toast({ title: "Erro ao criar usuário", description: error?.message || data.error.msg, variant: "destructive" });
+        toast({ title: "Erro ao criar usuário", description: error?.message || data.error?.msg || "Erro desconhecido", variant: "destructive" });
       } else {
+        // Se is_admin for true, atualizamos a tabela profiles
+        if (formData.is_admin) {
+          const { error: adminError } = await supabase
+            .from('profiles')
+            .update({ is_admin: true })
+            .eq('id', data.user.id);
+          if (adminError) {
+            console.error("Erro ao conceder admin:", adminError);
+          }
+        }
+
         await logAction('user_created', { userId: data.user.id, email: formData.email });
         toast({ title: "Sucesso!", description: `Usuário ${formData.name} criado.` });
         
@@ -237,7 +296,7 @@ const UserManagementPage = () => {
       toast({ title: "Sucesso!", description: `Usuário ${userToDelete.name} excluído.` });
       fetchUsers();
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -246,14 +305,14 @@ const UserManagementPage = () => {
           <h1 className="text-3xl font-bold text-foreground">Gerenciamento de Usuários</h1>
           <p className="text-muted-foreground mt-1">Visualize, crie e gerencie os usuários da intranet.</p>
         </div>
-        <Button onClick={() => handleOpenModal()}>
+        <Button onClick={() => handleOpenModal()} className="bg-gradient-to-r from-primary to-indigo-600 hover:from-primary/90 hover:to-indigo-600/90 text-white">
           <Plus className="w-4 h-4 mr-2" /> Novo Usuário
         </Button>
       </motion.div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="bg-card rounded-xl border border-border overflow-x-auto">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="bg-card rounded-xl border border-border shadow-sm overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="border-b border-border">
+          <thead className="border-b border-border bg-secondary/50">
             <tr>
               <th className="p-4 font-semibold text-foreground">Usuário</th>
               <th className="p-4 font-semibold text-foreground">Email</th>
@@ -267,58 +326,65 @@ const UserManagementPage = () => {
               <tr><td colSpan="5" className="p-4 text-center text-muted-foreground">Carregando usuários...</td></tr>
             ) : users.length > 0 ? (
               users.map((user) => (
-                <tr key={user.id} className="border-b border-border last:border-b-0 hover:bg-secondary">
+                <tr key={user.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40 transition-colors">
                   <td className="p-4 text-foreground font-medium flex items-center space-x-3">
-                    <img src={user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name || 'U'}`} alt={user.name} className="w-8 h-8 rounded-full" />
+                    <img src={user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name || 'U'}`} alt={user.name} className="w-8 h-8 rounded-full border border-border" />
                     <span>{user.name}</span>
                   </td>
                   <td className="p-4 text-muted-foreground">{user.email}</td>
                   <td className="p-4 text-muted-foreground">{user.role || 'N/A'}</td>
                   <td className="p-4 text-muted-foreground">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.is_admin ? 'bg-green-500/20 text-green-300' : 'bg-gray-500/20 text-gray-300'}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                      user.is_admin 
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                        : 'bg-slate-50 text-slate-600 border-slate-200'
+                    }`}>
                       {user.is_admin ? 'Admin' : 'Usuário'}
                     </span>
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end space-x-1">
-                      <Button variant="ghost" size="icon" onClick={() => navigate(`/dashboard/employees/${user.id}`)} className="text-muted-foreground hover:text-foreground hover:bg-secondary">
-                        <User className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/dashboard/employees/${user.id}`)} className="text-muted-foreground hover:text-foreground hover:bg-secondary" title="Ver Perfil">
+                        <User className="w-4 h-4 text-primary" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleOpenModal(user)} className="text-muted-foreground hover:text-foreground hover:bg-secondary" title="Editar Usuário">
+                        <Edit className="w-4 h-4" />
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-secondary">
+                          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground hover:bg-secondary" title="Alterar Permissão">
                             <ShieldCheck className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="bg-card border-border">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar Alteração de Permissão</AlertDialogTitle>
-                            <AlertDialogDescription>
+                            <AlertDialogTitle className="text-foreground">Confirmar Alteração de Permissão</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground">
                               Você tem certeza que deseja {user.is_admin ? 'remover a permissão de administrador' : 'conceder permissão de administrador'} para {user.name}?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => toggleAdmin(user)}>Confirmar</AlertDialogAction>
+                            <AlertDialogCancel className="bg-secondary text-foreground hover:bg-secondary/80 border-border">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => toggleAdmin(user)} className="bg-primary text-primary-foreground hover:bg-primary/90">Confirmar</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-red-500/80 hover:text-red-500 hover:bg-red-500/10" disabled={user.id === currentUser.id}>
+                          <Button variant="ghost" size="icon" className="text-red-500/80 hover:text-red-500 hover:bg-red-500/10" disabled={user.id === currentUser.id} title="Excluir Usuário">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="bg-card border-border">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Esta ação não pode ser desfeita. Isso excluirá permanentemente o usuário {user.name}. Tem certeza?
+                            <AlertDialogTitle className="text-foreground">Confirmar Exclusão</AlertDialogTitle>
+                            <AlertDialogDescription className="text-muted-foreground">
+                              Esta ação não pode ser desfeita. Isso excluirá permanentemente o usuário {user.name} da base. Tem certeza?
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteUser(user)}>Excluir</AlertDialogAction>
+                            <AlertDialogCancel className="bg-secondary text-foreground hover:bg-secondary/80 border-border">Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDeleteUser(user)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Excluir</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
@@ -334,11 +400,11 @@ const UserManagementPage = () => {
       </motion.div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px] bg-card border-border">
           <DialogHeader>
-            <DialogTitle>{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
-            <DialogDescription>
-              {editingUser ? 'Atualize os dados do funcionário.' : 'Preencha os dados para adicionar um novo funcionário.'}
+            <DialogTitle className="text-foreground text-xl font-bold">{editingUser ? 'Editar Usuário' : 'Criar Novo Usuário'}</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              {editingUser ? 'Atualize os dados e nível de acesso do colaborador.' : 'Preencha os dados e escolha o nível de permissão.'}
             </DialogDescription>
           </DialogHeader>
           <UserForm user={editingUser} onSave={handleSaveUser} onCancel={handleCloseModal} />
