@@ -1,5 +1,5 @@
 // Edge Function: create-user
-// Cria o usuario no auth e a linha correspondente em wiki.profiles.
+// Cria o usuario no auth e a linha em wiki.profiles. Exige admin.
 // Contrato: POST { email, password, user_metadata } -> { user } | { error }
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -12,15 +12,20 @@ const cors = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
   try {
+    const token = (req.headers.get("Authorization") ?? "").replace("Bearer ", "");
+    const { data: { user: caller } } = await admin.auth.getUser(token);
+    if (!caller) throw new Error("nao autenticado.");
+    const { data: callerProf } = await admin
+      .schema("wiki").from("profiles").select("is_admin").eq("id", caller.id).single();
+    if (!callerProf?.is_admin) throw new Error("apenas administradores.");
+
     const { email, password, user_metadata } = await req.json();
     if (!email || !password) throw new Error("email e password sao obrigatorios.");
-
-    const admin = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-      { db: { schema: "wiki" } },
-    );
 
     const { data, error } = await admin.auth.admin.createUser({
       email,
@@ -31,8 +36,7 @@ Deno.serve(async (req) => {
     if (error) throw error;
     const u = data.user;
 
-    // cria o perfil (o trigger de origem nao foi migrado)
-    const { error: pErr } = await admin.from("profiles").insert({
+    const { error: pErr } = await admin.schema("wiki").from("profiles").insert({
       id: u.id,
       email,
       name: user_metadata?.name ?? email,
@@ -45,7 +49,6 @@ Deno.serve(async (req) => {
       is_active: true,
     });
     if (pErr && !String(pErr.message).includes("duplicate")) {
-      // nao falha o cadastro por causa do perfil; apenas reporta
       console.error("Falha ao criar perfil:", pErr.message);
     }
 
