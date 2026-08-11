@@ -140,7 +140,7 @@
       linear-gradient(180deg, hsl(216 46% 16%) 0%, hsl(221 55% 9%) 100%);
   }
   .a2f-sidebar-link {
-    @apply flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors group;
+    @apply flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors;
   }
   .a2f-sidebar-link-active {
     @apply bg-white/10 text-white ring-1 ring-inset ring-cyan-400/30;

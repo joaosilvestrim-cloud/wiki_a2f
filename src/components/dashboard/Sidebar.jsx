@@ -104,7 +104,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
       to={item.path}
       end={item.path === '/dashboard'}
       className={({ isActive }) =>
-        `a2f-sidebar-link ${isActive ? 'a2f-sidebar-link-active' : 'a2f-sidebar-link-idle'}`
+        `a2f-sidebar-link group ${isActive ? 'a2f-sidebar-link-active' : 'a2f-sidebar-link-idle'}`
       }
       onClick={!isDesktop ? onClose : undefined}
     >
