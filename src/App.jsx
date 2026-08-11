@@ -7,11 +7,9 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import LoginPage from '@/pages/LoginPage';
 import Dashboard from '@/pages/Dashboard';
-import ModulesHubPage from '@/pages/ModulesHubPage';
 import '@/index.css';
 import '@/styles/react-quill-custom.css';
 
-// Fallback for missing configurations specifically for dashboard routes
 const ConfigWarning = () => (
   <div className="min-h-screen flex items-center justify-center bg-background p-4">
     <div className="max-w-md w-full bg-card p-8 rounded-xl shadow-lg border border-border text-center space-y-4">
@@ -43,14 +41,6 @@ function AppContent() {
     );
   }
 
-  // Modules Hub routing with config guard
-  const renderHub = () => {
-    if (!isConfigured) return <ConfigWarning />;
-    if (!user) return <Navigate to="/login" replace />;
-    return <ModulesHubPage />;
-  };
-
-  // Dashboard routing with config guard
   const renderDashboard = () => {
     if (!isConfigured) return <ConfigWarning />;
     if (!user) return <Navigate to="/login" replace />;
@@ -66,11 +56,7 @@ function AppContent() {
       <Routes>
         <Route 
           path="/login" 
-          element={user ? <Navigate to="/hub" replace /> : <LoginPage />} 
-        />
-        <Route 
-          path="/hub" 
-          element={renderHub()} 
+          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
         />
         <Route 
           path="/dashboard/*" 
@@ -78,11 +64,11 @@ function AppContent() {
         />
         <Route 
           path="/" 
-          element={<Navigate to={user ? "/hub" : "/login"} replace />} 
+          element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
         />
         <Route 
           path="*" 
-          element={<Navigate to={user ? "/hub" : "/login"} replace />} 
+          element={<Navigate to="/" replace />} 
         />
       </Routes>
       <Toaster />
