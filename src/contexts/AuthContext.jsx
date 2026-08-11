@@ -13,25 +13,70 @@ export const useAuth = () => {
   return context;
 };
 
+// Junta o usuario do auth com o perfil (name, role, is_admin, avatar_url...) da tabela profiles.
+const hydrateUser = async (authUser) => {
+  if (!authUser) return null;
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.id)
+      .maybeSingle();
+    return profile ? { ...authUser, ...profile } : authUser;
+  } catch (err) {
+    console.error('[AuthContext] Falha ao carregar perfil:', err);
+    return authUser;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isConfigured, setIsConfigured] = useState(!!supabase);
-  
+  const [isConfigured] = useState(!!supabase);
+
   const loginInProgress = useRef(false);
 
   useEffect(() => {
-    // Task 1: NO automatic requests on mount. Set loading to false immediately.
-    setLoading(false);
-    
     if (!supabase) {
-      console.warn("[AuthContext] Supabase credentials missing. Auth state set to null. No connection will be attempted.");
+      console.warn('[AuthContext] Supabase nao configurado.');
       setUser(null);
+      setLoading(false);
       return;
     }
-    
-    // We intentionally do NOT call supabase.auth.getSession() here to prevent any fetch loops on mount.
-    // The user will only be authenticated via manual login or manual session restore trigger.
+
+    let active = true;
+
+    // Restaura a sessao persistida e carrega o perfil.
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const hydrated = await hydrateUser(session?.user ?? null);
+        if (active) setUser(hydrated);
+      } catch (err) {
+        console.error('[AuthContext] Erro ao restaurar sessao:', err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    init();
+
+    // Mantem o estado em sincronia (refresh de token, logout em outra aba...).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!session?.user) {
+        if (active) setUser(null);
+        return;
+      }
+      // adia a consulta para nao travar o callback do supabase-js
+      setTimeout(async () => {
+        const hydrated = await hydrateUser(session.user);
+        if (active) setUser(hydrated);
+      }, 0);
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email, password) => {
@@ -41,42 +86,39 @@ export const AuthProvider = ({ children }) => {
 
     loginInProgress.current = true;
     setLoading(true);
-    
+
     if (!supabase) {
       loginInProgress.current = false;
       setLoading(false);
-      return { 
-        error: { 
-          message: "Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env.local file.",
+      return {
+        error: {
+          message: 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.',
           category: 'config',
-        } 
+        },
       };
     }
 
     try {
-      console.log('[AuthContext] Attempting manual login for:', email);
-
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
       if (error) throw error;
-      
-      setUser(data.user);
-      
+
+      const hydrated = await hydrateUser(data.user);
+      setUser(hydrated);
+
+      logAction('user_login', { email }).catch(() => {});
+
       toast({
-        title: "Login realizado com sucesso!",
-        description: "Bem-vindo à intranet corporativa.",
+        title: 'Login realizado com sucesso!',
+        description: 'Bem-vindo à intranet corporativa.',
       });
-      
-      loginInProgress.current = false;
-      setLoading(false);
+
       return { error: null };
-      
     } catch (err) {
-      console.error("[AuthContext] Login attempt failed:", err);
-      
+      console.error('[AuthContext] Login attempt failed:', err);
+      return { error: { message: err.message || 'Falha ao conectar com o servidor.', category: 'server' } };
+    } finally {
       loginInProgress.current = false;
       setLoading(false);
-      return { error: { message: err.message || "Falha ao conectar com o servidor.", category: 'server' } };
     }
   };
 
@@ -89,20 +131,13 @@ export const AuthProvider = ({ children }) => {
       }
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast({
-          title: "Erro no logout",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast({ title: 'Erro no logout', description: error.message, variant: 'destructive' });
       } else {
         setUser(null);
-        toast({
-          title: "Logout realizado",
-          description: "Você foi desconectado com sucesso.",
-        });
+        toast({ title: 'Logout realizado', description: 'Você foi desconectado com sucesso.' });
       }
     } catch (err) {
-      console.error("[AuthContext] Logout error:", err);
+      console.error('[AuthContext] Logout error:', err);
     } finally {
       setLoading(false);
     }
@@ -118,7 +153,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     loading,
     updateUserProfile,
-    isConfigured
+    isConfigured,
   };
 
   return (

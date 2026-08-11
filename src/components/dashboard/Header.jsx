@@ -37,7 +37,7 @@ const Header = ({ onMenuClick }) => {
 
     const channel = supabase
       .channel(`notifications:${user?.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user?.id}` },
+      .on('postgres_changes', { event: 'INSERT', schema: 'wiki', table: 'notifications', filter: `user_id=eq.${user?.id}` },
         (payload) => {
           setNotifications(prev => [payload.new, ...prev].slice(0, 10));
           setUnreadCount(prev => prev + 1);
