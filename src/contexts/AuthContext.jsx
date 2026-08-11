@@ -33,8 +33,28 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isConfigured] = useState(!!supabase);
+  const [connectionStatus, setConnectionStatus] = useState({
+    online: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    supabaseConnected: !!supabase,
+  });
 
   const loginInProgress = useRef(false);
+
+  // Estado de conexao (usado pelo indicador no header).
+  useEffect(() => {
+    const update = () =>
+      setConnectionStatus({
+        online: typeof navigator !== 'undefined' ? navigator.onLine : true,
+        supabaseConnected: !!supabase,
+      });
+    update();
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    return () => {
+      window.removeEventListener('online', update);
+      window.removeEventListener('offline', update);
+    };
+  }, []);
 
   useEffect(() => {
     if (!supabase) {
@@ -154,6 +174,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     updateUserProfile,
     isConfigured,
+    connectionStatus,
   };
 
   return (

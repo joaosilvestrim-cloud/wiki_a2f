@@ -4,7 +4,11 @@ import { WifiOff, Database, Wifi } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const ConnectionStatus = () => {
-  const { connectionStatus } = useAuth();
+  const auth = useAuth();
+  const connectionStatus = auth?.connectionStatus ?? {
+    online: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    supabaseConnected: true,
+  };
 
   // If fully connected, we can hide it or show a subtle success state in debug
   if (connectionStatus.online && connectionStatus.supabaseConnected) {
