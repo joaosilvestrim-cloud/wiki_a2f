@@ -161,7 +161,7 @@ const RecentActivity = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  {activity.profile?.name || 'Usuário'} {activity.action.replace('_', ' ')}
+                  {activity.profile?.name || 'Usuário'} {(activity.action || '').replace(/_/g, ' ')}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(activity.created_at).toLocaleString('pt-BR')}

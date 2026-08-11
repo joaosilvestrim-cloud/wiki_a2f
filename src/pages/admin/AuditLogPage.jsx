@@ -41,7 +41,7 @@ const AuditLogPage = () => {
     const matchesSearch =
       (log.profile?.name?.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (log.profile?.email?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (log.action.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (log.action?.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (JSON.stringify(log.details)?.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesAction = filterAction === 'all' || log.action === filterAction;

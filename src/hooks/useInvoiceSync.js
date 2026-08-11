@@ -8,10 +8,10 @@ export function useInvoiceSync(refreshCallback) {
     // Set up real-time subscription on the employee_documents table
     // Changed from invoice_tracking since documents are stored here
     const channel = supabase
-      .channel('public:employee_documents_sync')
+      .channel('wiki:employee_documents_sync')
       .on(
-        'postgres_changes', 
-        { event: '*', schema: 'public', table: 'employee_documents' }, 
+        'postgres_changes',
+        { event: '*', schema: 'wiki', table: 'employee_documents' },
         (payload) => {
           console.log('[useInvoiceSync] Document change received!', payload);
           // Only trigger if it's an invoice-related document

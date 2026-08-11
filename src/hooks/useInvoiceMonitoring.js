@@ -96,10 +96,10 @@ export function useInvoiceMonitoring(selectedMonth, selectedYear) {
 
     console.log('[useInvoiceMonitoring] Configurando listener realtime para employee_documents...');
     const channel = supabase
-      .channel('public:employee_documents_monitor')
+      .channel('wiki:employee_documents_monitor')
       .on(
-        'postgres_changes', 
-        { event: '*', schema: 'public', table: 'employee_documents' }, 
+        'postgres_changes',
+        { event: '*', schema: 'wiki', table: 'employee_documents' },
         (payload) => {
           console.log('[useInvoiceMonitoring] Evento realtime detectado em employee_documents:', payload.eventType, payload);
           // Trigger the UI update
