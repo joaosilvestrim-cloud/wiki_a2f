@@ -8,7 +8,12 @@ const supabaseAnonKey =
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx0dWFhYW5rdW5qc2F0b3d3ZWtuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQyNTIxMjksImV4cCI6MjA2OTgyODEyOX0.WTXR6fzqOVmmjHkKtYu8t6z9JFeXAdFBAqp_Nc7Ob2A';
 
-const customSupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+// Todo o conteudo do wiki vive no schema "wiki" do banco compartilhado Site_a2f,
+// isolado do schema public (que roda outros sistemas). O schema "wiki" precisa
+// estar em Settings > API > Exposed schemas no projeto Supabase.
+const customSupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+  db: { schema: 'wiki' },
+});
 
 export default customSupabaseClient;
 

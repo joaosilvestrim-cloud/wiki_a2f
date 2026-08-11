@@ -20,18 +20,32 @@ npm install
 npm run dev      # http://localhost:3000
 ```
 
-## Atencao — tabelas ainda nao criadas no banco compartilhado
+## Schema "wiki" (isolado)
 
-Este app foi exportado do Horizons apontando para outro projeto Supabase, entao as tabelas
-que ele usa (`wiki_articles`, `wiki_categories`, `profiles`, `mural_posts`, `pdi`,
-`employee_documents`, `projects_module`, `project_tasks`, `company_events`, etc.) **ainda
-nao existem** no projeto `Site_a2f`. Elas precisam ser criadas la antes do app funcionar.
+Todo o conteudo do wiki foi migrado do projeto Supabase antigo para dentro do
+`Site_a2f`, num **schema separado chamado `wiki`**. Isso isola 100% do schema `public`
+(que roda o A2F Gestao, o site DriveData, o CRM etc.) — sem colisao de nomes de tabela.
 
-Ha duas tabelas cujo nome **colide** com o sistema A2F Gestao, que ja roda em producao
-nesse mesmo banco:
+O cliente Supabase ja aponta para esse schema (`db: { schema: 'wiki' }` em
+`src/lib/customSupabaseClient.js`).
 
-- `projects`  (Gestao = workspaces Ayumana/A2F/EPIC)
-- `notifications`  (Gestao = notificacoes internas de tarefas)
+### Passo manual necessario (uma vez)
+Para o PostgREST aceitar o schema `wiki`, ele precisa estar exposto na API do projeto:
 
-Recomendado: renomear essas duas no codigo da wiki (ex.: `wiki_projects`,
-`wiki_notifications`) antes de criar o schema, para nao conflitar com o sistema em producao.
+- Supabase (projeto Site_a2f) > **Settings > API > Exposed schemas** > adicionar **`wiki`** > Save.
+
+Sem isso, as consultas do app retornam erro de schema.
+
+### O que ja foi migrado
+- 28 tabelas no schema `wiki` (artigos, versoes, categorias, mural, PDI, documentos de
+  colaborador, eventos, gestao de projetos interna), com constraints, indices, 54 policies
+  RLS e 3 triggers.
+- 14 usuarios do wiki foram trazidos para o `auth.users` do Site_a2f (login preservado).
+- 3 usuarios que ja existiam no Site_a2f (`joao.silvestrim`, `juliana.ferreira`,
+  `luiz.alcoba` @a2f.com.br) **nao** foram duplicados — a reconciliacao deles fica pendente.
+
+### Pendencias
+- **Arquivos do Storage** (anexos, documentos de colaborador, imagens do mural) ainda
+  apontam para os buckets do projeto Supabase antigo. A copia dos binarios e uma etapa
+  separada, se necessario.
+- Reconciliar os 3 usuarios acima (ligar o conteudo deles as contas do Site_a2f).
