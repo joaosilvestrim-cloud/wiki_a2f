@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import LoginPage from '@/pages/LoginPage';
 import Dashboard from '@/pages/Dashboard';
+import PasswordResetForcePage from '@/pages/PasswordResetForcePage';
 import '@/index.css';
 import '@/styles/react-quill-custom.css';
 
@@ -39,6 +40,11 @@ function AppContent() {
         </div>
       </div>
     );
+  }
+
+  // Force password reset if temporary password is active
+  if (user && user.needs_password_change) {
+    return <PasswordResetForcePage />;
   }
 
   const renderDashboard = () => {

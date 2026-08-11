@@ -22,6 +22,7 @@ const UserForm = ({ user, onSave, onCancel }) => {
     phone: user?.phone || '',
     location: user?.location || '',
     is_admin: user?.is_admin || false,
+    needs_password_change: user?.needs_password_change || false,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,14 +53,57 @@ const UserForm = ({ user, onSave, onCancel }) => {
         </div>
       </div>
       
-      {!isEditing && (
-        <div>
-          <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha Provisória</Label>
-          <div className="relative mt-1">
-            <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} required minLength="6" placeholder="Mínimo 6 caracteres" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
+      {!isEditing ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="password" className="text-sm font-medium text-foreground">Senha Provisória</Label>
+            <div className="relative mt-1">
+              <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} required minLength="6" placeholder="Mínimo 6 caracteres" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 pt-6">
+            <input
+              type="checkbox"
+              id="needs_password_change"
+              checked={formData.needs_password_change}
+              onChange={(e) => setFormData(prev => ({ ...prev, needs_password_change: e.target.checked }))}
+              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+            />
+            <Label htmlFor="needs_password_change" className="text-sm font-medium text-foreground cursor-pointer">
+              Exigir alteração no primeiro login (Senha Temporária)
+            </Label>
+          </div>
+        </div>
+      ) : (
+        <div className="border-t border-border pt-4 mt-2">
+          <p className="text-sm font-semibold text-foreground mb-3">Segurança e Senha</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">Redefinir Senha (deixe em branco para manter)</Label>
+              <div className="relative mt-1">
+                <Input id="password" type={showPassword ? "text" : "password"} value={formData.password} onChange={handleChange} minLength="6" placeholder="Definir nova senha" />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+            {formData.password && (
+              <div className="flex items-center space-x-2 pt-6">
+                <input
+                  type="checkbox"
+                  id="needs_password_change"
+                  checked={formData.needs_password_change}
+                  onChange={(e) => setFormData(prev => ({ ...prev, needs_password_change: e.target.checked }))}
+                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                />
+                <Label htmlFor="needs_password_change" className="text-sm font-medium text-foreground cursor-pointer">
+                  Definir como Senha Temporária (Exigir alteração)
+                </Label>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -174,6 +218,7 @@ const UserManagementPage = () => {
 
   const handleSaveUser = async (formData) => {
     if (editingUser) { // Editing existing user
+      // 1. Update basic profile data
       const { error } = await supabase
         .from('profiles')
         .update({
@@ -183,17 +228,30 @@ const UserManagementPage = () => {
           phone: formData.phone,
           location: formData.location,
           is_admin: formData.is_admin,
+          needs_password_change: formData.password ? formData.needs_password_change : editingUser.needs_password_change,
         })
         .eq('id', editingUser.id);
 
       if (error) {
         toast({ title: "Erro ao atualizar usuário", description: error.message, variant: "destructive" });
-      } else {
-        await logAction('user_updated', { userId: editingUser.id, name: formData.name, isAdmin: formData.is_admin });
-        toast({ title: "Sucesso!", description: `Usuário ${formData.name} atualizado.` });
-        handleCloseModal();
-        fetchUsers();
+        return;
       }
+
+      // 2. If password was set, update it using Edge Function
+      if (formData.password) {
+        const { error: pwError } = await supabase.functions.invoke('update-user-password', {
+          body: { userId: editingUser.id, password: formData.password }
+        });
+        if (pwError) {
+          toast({ title: "Erro ao atualizar senha", description: pwError.message, variant: "destructive" });
+          return;
+        }
+      }
+
+      await logAction('user_updated', { userId: editingUser.id, name: formData.name, isAdmin: formData.is_admin });
+      toast({ title: "Sucesso!", description: `Usuário ${formData.name} atualizado.` });
+      handleCloseModal();
+      fetchUsers();
     } else { // Creating new user
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: {
@@ -213,14 +271,18 @@ const UserManagementPage = () => {
       if (error || data.error) {
         toast({ title: "Erro ao criar usuário", description: error?.message || data.error?.msg || "Erro desconhecido", variant: "destructive" });
       } else {
-        // Se is_admin for true, atualizamos a tabela profiles
-        if (formData.is_admin) {
-          const { error: adminError } = await supabase
+        // Se is_admin ou needs_password_change forem setados, atualizamos profiles
+        const updates = {};
+        if (formData.is_admin) updates.is_admin = true;
+        if (formData.needs_password_change) updates.needs_password_change = true;
+
+        if (Object.keys(updates).length > 0) {
+          const { error: profileError } = await supabase
             .from('profiles')
-            .update({ is_admin: true })
+            .update(updates)
             .eq('id', data.user.id);
-          if (adminError) {
-            console.error("Erro ao conceder admin:", adminError);
+          if (profileError) {
+            console.error("Erro ao configurar permissões/senha temporária:", profileError);
           }
         }
 
@@ -235,6 +297,7 @@ const UserManagementPage = () => {
               <h1>Olá, ${formData.name}!</h1>
               <p>Sua conta na nossa intranet foi criada com sucesso.</p>
               <p>Seu login é: <strong>${formData.email}</strong></p>
+              ${formData.needs_password_change ? `<p>Sua senha provisória é: <strong>${formData.password}</strong> (será solicitada a alteração no primeiro login).</p>` : ''}
               <p>Acesse a plataforma para começar a colaborar com sua equipe.</p>
             `,
           }),
@@ -329,7 +392,14 @@ const UserManagementPage = () => {
                 <tr key={user.id} className="border-b border-border last:border-b-0 hover:bg-secondary/40 transition-colors">
                   <td className="p-4 text-foreground font-medium flex items-center space-x-3">
                     <img src={user.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name || 'U'}`} alt={user.name} className="w-8 h-8 rounded-full border border-border" />
-                    <span>{user.name}</span>
+                    <div className="flex flex-col">
+                      <span>{user.name}</span>
+                      {user.needs_password_change && (
+                        <span className="text-[10px] text-amber-600 font-semibold bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 mt-0.5 w-max">
+                          Senha Temporária
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="p-4 text-muted-foreground">{user.email}</td>
                   <td className="p-4 text-muted-foreground">{user.role || 'N/A'}</td>
