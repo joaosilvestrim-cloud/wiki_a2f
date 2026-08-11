@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import LoginPage from '@/pages/LoginPage';
 import Dashboard from '@/pages/Dashboard';
+import ModulesHubPage from '@/pages/ModulesHubPage';
 import '@/index.css';
 import '@/styles/react-quill-custom.css';
 
@@ -42,6 +43,13 @@ function AppContent() {
     );
   }
 
+  // Modules Hub routing with config guard
+  const renderHub = () => {
+    if (!isConfigured) return <ConfigWarning />;
+    if (!user) return <Navigate to="/login" replace />;
+    return <ModulesHubPage />;
+  };
+
   // Dashboard routing with config guard
   const renderDashboard = () => {
     if (!isConfigured) return <ConfigWarning />;
@@ -52,13 +60,17 @@ function AppContent() {
   return (
     <>
       <Helmet>
-        <title>Intranet Corporativa</title>
-        <meta name="description" content="Sistema de intranet corporativa moderno e eficiente" />
+        <title>Intranet Corporativa • A2F / DriveData</title>
+        <meta name="description" content="Sistema de intranet corporativa e plataforma integrada moderna" />
       </Helmet>
       <Routes>
         <Route 
           path="/login" 
-          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} 
+          element={user ? <Navigate to="/hub" replace /> : <LoginPage />} 
+        />
+        <Route 
+          path="/hub" 
+          element={renderHub()} 
         />
         <Route 
           path="/dashboard/*" 
@@ -66,11 +78,11 @@ function AppContent() {
         />
         <Route 
           path="/" 
-          element={<Navigate to={user ? "/dashboard" : "/login"} replace />} 
+          element={<Navigate to={user ? "/hub" : "/login"} replace />} 
         />
         <Route 
           path="*" 
-          element={<Navigate to="/" replace />} 
+          element={<Navigate to={user ? "/hub" : "/login"} replace />} 
         />
       </Routes>
       <Toaster />

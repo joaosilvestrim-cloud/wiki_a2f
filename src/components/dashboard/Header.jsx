@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Bell, Search, LogOut, Settings } from 'lucide-react';
+import { Menu, Bell, Search, LogOut, Settings, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/customSupabaseClient';
@@ -96,6 +96,17 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-3">
+        <Link to="/hub">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-1.5 text-xs font-semibold bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-700 border-cyan-500/30 rounded-lg h-9 px-3 transition-colors"
+          >
+            <LayoutGrid className="w-4 h-4 text-cyan-600" />
+            <span className="hidden sm:inline">Módulos</span>
+          </Button>
+        </Link>
+
         <ConnectionStatus />
         
 

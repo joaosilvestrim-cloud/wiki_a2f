@@ -24,7 +24,8 @@ import {
   Target,
   KanbanSquare,
   Activity,
-  Receipt
+  Receipt,
+  LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,7 @@ const Sidebar = ({ isOpen, onClose, isDesktop }) => {
   }, [fetchSitePages]);
 
   const mainNavItems = [
+    { name: 'Central de Módulos', path: '/hub', icon: LayoutGrid },
     { name: 'Início', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Meu PDI', path: '/dashboard/my-pdi', icon: Target },
     { name: 'Meus Documentos', path: '/dashboard/my-documents', icon: FileTextIcon },
