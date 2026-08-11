@@ -22,12 +22,18 @@ const pageTitles = {
 };
 
 const PublicPageViewer = () => {
-  const { pageSlug } = useParams();
+  // A rota e "/page/*" (curinga), entao o slug vem em params['*'], nao em pageSlug.
+  const params = useParams();
+  const pageSlug = params.pageSlug || params['*'] || '';
   const [pageData, setPageData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const pageTitle = pageTitles[pageSlug] || pageSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const pageTitle =
+    pageTitles[pageSlug] ||
+    (pageSlug
+      ? pageSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+      : 'Página');
 
   useEffect(() => {
     const fetchPage = async () => {
