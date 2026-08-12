@@ -25,8 +25,9 @@ const InvoiceMonitoringPage = () => {
   const { user } = useAuth();
   const isAdmin = user?.is_admin;
 
-  const [selectedMonth, setSelectedMonth] = useState(6);
-  const [selectedYear, setSelectedYear] = useState(2026);
+  const now = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [showDebug, setShowDebug] = useState(false);
   const [diagnosticLogs, setDiagnosticLogs] = useState([]);
 
@@ -98,9 +99,21 @@ const InvoiceMonitoringPage = () => {
   }, [employeeInvoices, searchTerm, statusFilter, sortConfig]);
 
   const getStatusBadge = (status) => {
-    if (status === 'green') return <span className="badge-green"><FileCheck className="w-3 h-3 mr-1"/> Enviado</span>;
-    if (status === 'yellow') return <span className="badge-yellow">Pendente</span>;
-    return <span className="badge-red">Nunca Enviou</span>;
+    if (status === 'green') return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold" style={{ background: 'hsl(var(--status-green-bg))', color: 'hsl(var(--status-green))' }}>
+        <FileCheck className="w-4 h-4" /> Enviou
+      </span>
+    );
+    if (status === 'yellow') return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold" style={{ background: 'hsl(var(--status-yellow-bg))', color: 'hsl(var(--status-yellow))' }}>
+        <Clock className="w-4 h-4" /> Pendente
+      </span>
+    );
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold" style={{ background: 'hsl(var(--status-red-bg))', color: 'hsl(var(--status-red))' }}>
+        <AlertCircle className="w-4 h-4" /> Nunca enviou
+      </span>
+    );
   };
 
   const metrics = {
@@ -264,22 +277,41 @@ const InvoiceMonitoringPage = () => {
               <span className="text-xs font-semibold text-muted-foreground uppercase">Total Entregues (Mês)</span>
               <span className="text-2xl font-bold">{metrics.invoicesThisMonth}</span>
             </div>
-            <div className="card p-4 flex flex-col justify-center border-l-4 border-l-border">
-              <span className="text-xs font-semibold text-muted-foreground uppercase">Ativos</span>
+            <button
+              type="button"
+              onClick={() => setStatusFilter('all')}
+              className={`card p-4 flex flex-col justify-center text-left border-l-4 border-l-border transition hover:shadow-md ${statusFilter === 'all' ? 'ring-2 ring-primary' : ''}`}
+            >
+              <span className="text-xs font-semibold text-muted-foreground uppercase">Ativos (todos)</span>
               <span className="text-2xl font-bold">{metrics.total}</span>
-            </div>
-            <div className="card p-4 flex flex-col justify-center border-l-4 border-l-[hsl(var(--status-green))]">
-              <span className="text-xs font-semibold text-[hsl(var(--status-green))] uppercase">Enviados (Mês)</span>
-              <span className="text-2xl font-bold text-[hsl(var(--status-green))]">{metrics.green}</span>
-            </div>
-            <div className="card p-4 flex flex-col justify-center border-l-4 border-l-[hsl(var(--status-yellow))]">
-              <span className="text-xs font-semibold text-[hsl(var(--status-yellow))] uppercase">Pendentes (Mês)</span>
-              <span className="text-2xl font-bold text-[hsl(var(--status-yellow))]">{metrics.yellow}</span>
-            </div>
-            <div className="card p-4 flex flex-col justify-center border-l-4 border-l-[hsl(var(--status-red))]">
-              <span className="text-xs font-semibold text-[hsl(var(--status-red))] uppercase">Sem Histórico</span>
-              <span className="text-2xl font-bold text-[hsl(var(--status-red))]">{metrics.red}</span>
-            </div>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'green' ? 'all' : 'green')}
+              style={{ borderLeftColor: 'hsl(var(--status-green))' }}
+              className={`card p-4 flex flex-col justify-center text-left border-l-4 transition hover:shadow-md ${statusFilter === 'green' ? 'ring-2' : ''}`}
+            >
+              <span className="text-xs font-semibold uppercase" style={{ color: 'hsl(var(--status-green))' }}>Enviaram (Mês)</span>
+              <span className="text-2xl font-bold" style={{ color: 'hsl(var(--status-green))' }}>{metrics.green}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'yellow' ? 'all' : 'yellow')}
+              style={{ borderLeftColor: 'hsl(var(--status-yellow))' }}
+              className={`card p-4 flex flex-col justify-center text-left border-l-4 transition hover:shadow-md ${statusFilter === 'yellow' ? 'ring-2' : ''}`}
+            >
+              <span className="text-xs font-semibold uppercase" style={{ color: 'hsl(var(--status-yellow))' }}>Pendentes (Mês)</span>
+              <span className="text-2xl font-bold" style={{ color: 'hsl(var(--status-yellow))' }}>{metrics.yellow}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setStatusFilter(statusFilter === 'red' ? 'all' : 'red')}
+              style={{ borderLeftColor: 'hsl(var(--status-red))' }}
+              className={`card p-4 flex flex-col justify-center text-left border-l-4 transition hover:shadow-md ${statusFilter === 'red' ? 'ring-2' : ''}`}
+            >
+              <span className="text-xs font-semibold uppercase" style={{ color: 'hsl(var(--status-red))' }}>Sem Histórico</span>
+              <span className="text-2xl font-bold" style={{ color: 'hsl(var(--status-red))' }}>{metrics.red}</span>
+            </button>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
@@ -356,18 +388,38 @@ const InvoiceMonitoringPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y border-border">
-                    {filteredAndSortedData.map((emp) => (
-                      <tr key={emp.id} className="table-row-hover">
-                        <td className="px-6 py-4 font-medium text-foreground">{emp.name || 'Sem nome'}</td>
+                    {filteredAndSortedData.map((emp) => {
+                      const tintVar = emp.status === 'green'
+                        ? '--status-green' : emp.status === 'yellow'
+                        ? '--status-yellow' : '--status-red';
+                      return (
+                      <tr
+                        key={emp.id}
+                        className="transition hover:brightness-[0.97]"
+                        style={{ background: `hsl(var(${tintVar}) / 0.06)` }}
+                      >
+                        <td
+                          className="px-6 py-4 font-semibold text-foreground border-l-4"
+                          style={{ borderLeftColor: `hsl(var(${tintVar}))` }}
+                        >
+                          {emp.name || 'Sem nome'}
+                        </td>
                         <td className="px-6 py-4">{getStatusBadge(emp.status)}</td>
                         <td className="px-6 py-4 text-muted-foreground">{emp.totalInvoices}</td>
-                        <td className="px-6 py-4 font-medium text-foreground">{emp.invoicesThisMonth}</td>
+                        <td className="px-6 py-4">
+                          <span
+                            className="font-bold"
+                            style={{ color: emp.invoicesThisMonth > 0 ? 'hsl(var(--status-green))' : 'inherit' }}
+                          >
+                            {emp.invoicesThisMonth}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-muted-foreground">
                           {emp.lastUploadDate ? new Date(emp.lastUploadDate).toLocaleDateString('pt-BR') : '-'}
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             className="hover:bg-primary/10 hover:text-primary"
                             onClick={() => setSelectedEmployee(emp)}
@@ -377,7 +429,8 @@ const InvoiceMonitoringPage = () => {
                           </Button>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                     {filteredAndSortedData.length === 0 && (
                       <tr>
                         <td colSpan="6" className="px-6 py-12 text-center text-muted-foreground">
